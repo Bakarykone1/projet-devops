@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  # Notre base de données
+  db:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_DB: matable_db
+      POSTGRES_USER: user_devops
+      POSTGRES_PASSWORD: password123
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # Notre application Python
+  app:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      DB_HOST: db
+      DB_NAME: matable_db
+      DB_USER: user_devops
+      DB_PASS: password123
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:
