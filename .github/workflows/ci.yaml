@@ -1,0 +1,25 @@
+name: CI Pipeline - Build Test
+
+# Ce pipeline se déclenche à chaque "push" sur la branche main
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. On récupère le code du dépôt
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    # 2. On installe Docker Buildx (pour le build d'image)
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    # 3. On tente de builder l'image Docker pour voir si tout est OK
+    - name: Build Docker image
+      run: |
+        docker build -t mon-app-python:test .
+        echo "L'image a été buildée avec succès !"
