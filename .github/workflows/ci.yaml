@@ -4,7 +4,6 @@ on:
   push:
     branches: [ "main" ]
 
-# Autorisations nécessaires pour écrire l'image dans le registry GitHub
 permissions:
   contents: read
   packages: write
@@ -16,7 +15,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # 1. Connexion au Registry GitHub (GHCR)
+      # 1. Connexion au Registry GitHub
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v2
         with:
@@ -24,14 +23,20 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # 2. Préparation du nom de l'image (en minuscules)
-      - name: Set image name
-        run: echo "IMAGE_URL=ghcr.io/${{ github.repository_owner }}/mon-app-python:latest" | tr '[:upper:]' '[:lower:]' >> $GITHUB_ENV
+      # 2. On prépare proprement le nom de l'image (en minuscules automatiquement)
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=raw,value=latest
 
-      # 3. Build et Push de l'image
+      # 3. Build et Push avec les tags générés à l'étape précédente
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
         with:
           context: .
           push: true
-          tags: ${{ env.IMAGE_URL }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
