@@ -1,5 +1,4 @@
 version: '3.8'
-
 services:
   # Notre base de données
   db:
